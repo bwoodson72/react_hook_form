@@ -15,9 +15,8 @@ const schema = z.object({
 
   // Optional: if provided, must be a valid URL
   // Note: this uses the older chained style; Zod v4 may show a deprecation warning here.
-  // If you see TS6385, we can switch this to a non-deprecated URL validator.
-  // If you see TS6385, we can switch this to a non-deprecated URL validator.
-  website: z.string().url().optional(),
+  // Zod v4: prefer z.url() over z.string().url()
+  website: z.url().optional(),
 
   // Required: must be a valid email
   email: z.email({ message: "Please enter a valid email address." }),
@@ -67,7 +66,7 @@ export function Form() {
     // Outer wrapper: centers the form on the screen
     <div className="flex justify-center align-middle w-screen h-screen m-5">
       <form
-        className="flex flex-col gap-4 m-2 xs:w-375 md:w-2xl min-w-xs p-5 border border-gray-300 rounded-lg bg-gray-800"
+        className="flex flex-col gap-4 m-2 xs:w-375 md:w-2xl min-w-xs p-5 border border-gray-300 rounded-lg bg-gray-800 shadow-2xl"
         onSubmit={handleSubmit(onSubmit)}
         noValidate
         aria-busy={isSubmitting}
@@ -122,7 +121,9 @@ export function Form() {
           type="text"
           aria-invalid={Boolean(errors.company)}
           aria-describedby={errors.company ? "company-error" : undefined}
-          {...register("company", { required: false })}
+          {...register("company", {
+    setValueAs: (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+  })}
         />
         {errors.company && (
           <p id="company-error" className="text-red-500" role="alert">
@@ -139,7 +140,9 @@ export function Form() {
               id="website"
               // Use type="url" for nicer mobile keyboards + built-in browser hints
               type="url"
-              {...register("website", { required: false })}
+              {...register("website", {
+    setValueAs: (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+  })}
               aria-invalid={Boolean(errors.website)}
               aria-describedby={errors.website ? "website-error" : undefined}
               className={`rounded-lg border p-2 w-full focus:bg-gray-700 ${
