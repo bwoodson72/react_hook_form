@@ -64,9 +64,9 @@ export function Form() {
 
   return (
     // Outer wrapper: centers the form on the screen
-    <div className="flex justify-center align-middle w-screen h-screen m-5">
+    <div className="flex justify-center align-middle  m-5">
       <form
-        className="flex flex-col gap-4 m-2 xs:w-375 md:w-2xl min-w-xs p-5 border border-gray-300 rounded-lg bg-gray-800 shadow-2xl"
+        className="flex flex-col gap-4 m-2 xs:w-375 md:w-xl min-w-xs h-fit  p-5 border border-gray-300 rounded-lg bg-gray-800 shadow-2xl"
         onSubmit={handleSubmit(onSubmit)}
         noValidate
         aria-busy={isSubmitting}
@@ -180,7 +180,7 @@ export function Form() {
         <label htmlFor="message">Message *</label>
         <textarea
           id="message"
-          className={`rounded-lg border p-2 w-full h-100 focus:bg-gray-700 ${
+          className={`rounded-lg border p-2 w-full h-60 focus:bg-gray-700 ${
             errors.message ? "border-red-500" : "border-gray-100"
           }`}
           aria-required="true"
