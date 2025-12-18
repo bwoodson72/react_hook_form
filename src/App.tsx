@@ -1,5 +1,5 @@
 
-import {Form} from './component/form'
+import Form from './component/form'
 
 
 function App() {

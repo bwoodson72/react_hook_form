@@ -1,210 +1,157 @@
+'use client'
+
+import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { motion, AnimatePresence } from "motion/react";
 
-// Zod schema: defines the shape of the form data + validation rules.
-// react-hook-form will use this (via zodResolver) to produce `errors` and validate on submit.
 const schema = z.object({
-  // Required: at least 2 chars
-  firstName: z.string().min(2, "First name must be at least 2 characters."),
-  // Required: at least 2 chars
-  lastName: z.string().min(2, "Last name must be at least 2 characters."),
-
-  // Optional: can be empty/undefined
-  company: z.string().optional(),
-
-  // Optional: if provided, must be a valid URL
-  // Note: this uses the older chained style; Zod v4 may show a deprecation warning here.
-  // Zod v4: prefer z.url() over z.string().url()
-  website: z.url().optional(),
-
-  // Required: must be a valid email
-  email: z.email({ message: "Please enter a valid email address." }),
-
-  // Required: at least 10 chars
-  message: z.string().min(10, "Message must be at least 10 characters."),
+  firstName: z.string().min(2, "Name required."),
+  lastName: z.string().min(2, "Name required."),
+  email: z.string().email("Invalid email address."),
+  message: z.string().min(10, "Please provide more details."),
 });
 
-// Typescript type inferred directly from the Zod schema.
-// This keeps your form types and validation rules in sync.
-// This keeps your form types and validation rules in sync.
 type Inputs = z.infer<typeof schema>;
 
-export function Form() {
-  // useForm wires up:
-  // - register(): connects inputs to react-hook-form
-  // - handleSubmit(): runs validation + calls your onSubmit if valid
-  // - watch(): lets you react to live field values (like conditionally showing fields)
-  // - formState: contains validation errors and submission state
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm<Inputs>({
-    // Connect Zod validation to react-hook-form
+export default function ProfessionalContactDemo() {
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<Inputs>({
     resolver: zodResolver(schema),
   });
 
-  // Watch the company field in real-time.
-  // We'll use this to conditionally render the Website field only when company has a value.
-  const companyValue = watch("company");
-
-  // Submit handler.
-  // Returning a Promise allows react-hook-form to set `isSubmitting` while the promise is pending.
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    // Simulate an async request (e.g., sending data to an API)
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        alert(JSON.stringify(data, null, 2));
-        resolve();
-      }, 1500);
-    });
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    console.log("%c DEMO DATA RECEIVED ", "background: #3b82f6; color: #fff; font-weight: bold;");
+    console.table(data);
+    setIsSuccess(true);
+    reset(); // Properly clears form fields
   };
 
+  const shakeVariants = {
+    error: { x: [0, -4, 4, -4, 4, 0], transition: { duration: 0.4 } }
+  };
+
+  const inputStyles = (fieldName: keyof Inputs) => `
+    w-full bg-white/5 border py-3 px-4 text-base text-white rounded-xl
+    placeholder:text-white/20 focus:outline-none transition-all duration-300
+    ${errors[fieldName] ? "border-red-500/50 bg-red-500/5" : "border-white/10 focus:border-blue-500"}
+  `;
+
   return (
-    // Outer wrapper: centers the form on the screen
-    <div className="flex justify-center align-middle  m-5">
-      <form
-        className="flex flex-col gap-4 m-2 xs:w-375 md:w-xl min-w-xs h-fit  p-5 border border-gray-300 rounded-lg bg-gray-800 shadow-2xl"
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-        aria-busy={isSubmitting}
-      >
-        <label htmlFor="firstName">First Name *</label>
-        <input
-          id="firstName"
-          // Conditional Tailwind class:
-          // - if there's an error, show a red border
-          // - otherwise, show a neutral gray border
-          className={`rounded-lg border p-2 w-full focus:bg-gray-700 ${
-            errors.firstName ? "border-red-500" : "border-gray-100"
-          }`}
-          type="text"
-          aria-required="true"
-          aria-invalid={Boolean(errors.firstName)}
-          aria-describedby={errors.firstName ? "firstName-error" : undefined}
-          // register() connects this input to RHF and associates it with the "firstName" key
-          {...register("firstName", { required: true })}
-        />
-        {/* role="alert" announces the error message when it appears */}
-        {errors.firstName && (
-          <p id="firstName-error" className="text-red-500" role="alert">
-            {errors.firstName.message}
-          </p>
-        )}
+      <section id="contact-demo" className="relative min-h-screen w-full flex items-center justify-center px-6 py-24 bg-black overflow-hidden font-sans">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/10 blur-[130px] rounded-full pointer-events-none" />
 
-        <label htmlFor="lastName">Last Name *</label>
-        <input
-          id="lastName"
-          className={`rounded-lg border p-2 w-full focus:bg-gray-700 ${
-            errors.lastName ? "border-red-500" : "border-gray-100"
-          }`}
-          type="text"
-          aria-required="true"
-          aria-invalid={Boolean(errors.lastName)}
-          aria-describedby={errors.lastName ? "lastName-error" : undefined}
-          {...register("lastName", { required: true })}
-        />
-        {errors.lastName && (
-          <p id="lastName-error" className="text-red-500" role="alert">
-            {errors.lastName.message}
-          </p>
-        )}
+        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center relative z-10">
 
-        <label htmlFor="company">Company</label>
-        <input
-          id="company"
-          className={`rounded-lg border p-2 w-full focus:bg-gray-700 ${
-            errors.company ? "border-red-500" : "border-gray-100"
-          }`}
-          type="text"
-          aria-invalid={Boolean(errors.company)}
-          aria-describedby={errors.company ? "company-error" : undefined}
-          {...register("company", {
-    setValueAs: (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
-  })}
-        />
-        {errors.company && (
-          <p id="company-error" className="text-red-500" role="alert">
-            {errors.company.message}
-          </p>
-        )}
+          {/* Left Side: Technical Narrative (Restored) */}
+          <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="space-y-10"
+          >
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/5 mb-2">
+                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-mono text-blue-400 uppercase tracking-widest">Interactive Tech Demo</span>
+              </div>
+              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-white uppercase leading-[0.9]">
+                Technical <br />
+                <span className="text-blue-500">Implementation.</span>
+              </h2>
+            </div>
 
-        {/* Conditional field:
-            If company has any value, we show "Website". */}
-        {companyValue && (
-          <>
-            <label htmlFor="website">Website</label>
-            <input
-              id="website"
-              // Use type="url" for nicer mobile keyboards + built-in browser hints
-              type="url"
-              {...register("website", {
-    setValueAs: (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
-  })}
-              aria-invalid={Boolean(errors.website)}
-              aria-describedby={errors.website ? "website-error" : undefined}
-              className={`rounded-lg border p-2 w-full focus:bg-gray-700 ${
-                errors.website ? "border-red-500" : "border-gray-100"
-              }`}
-            />
-            {errors.website && (
-              <p id="website-error" className="text-red-500" role="alert">
-                {errors.website.message}
+            <div className="space-y-8">
+              <p className="text-white/70 text-lg leading-relaxed max-w-lg">
+                This exhibit demonstrates a production-grade form architecture. It utilizes **Zod** for schema-based validation and **React Hook Form** for optimized, non-re-rendering state management.
               </p>
-            )}
-          </>
-        )}
 
-        <label htmlFor="email">Email *</label>
-        <input
-          id="email"
-          className={`rounded-lg border p-2 w-full focus:bg-gray-700 ${
-            errors.email ? "border-red-500" : "border-gray-100"
-          }`}
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          aria-required="true"
-          aria-invalid={Boolean(errors.email)}
-          aria-describedby={errors.email ? "email-error" : undefined}
-          {...register("email", { required: false })}
-        />
-        {errors.email && (
-          <p id="email-error" className="text-red-500" role="alert">
-            {errors.email.message}
-          </p>
-        )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
+                <div className="space-y-1 p-4 border border-white/5 bg-white/[0.02] rounded-2xl">
+                  <span className="text-blue-400 font-mono text-[10px] uppercase tracking-widest">01 / Validation</span>
+                  <p className="text-sm text-white/90 font-medium">Real-time Schema Logic</p>
+                </div>
+                <div className="space-y-1 p-4 border border-white/5 bg-white/[0.02] rounded-2xl">
+                  <span className="text-blue-400 font-mono text-[10px] uppercase tracking-widest">02 / UX</span>
+                  <p className="text-sm text-white/90 font-medium">Async Submit Handling</p>
+                </div>
+              </div>
 
-        <label htmlFor="message">Message *</label>
-        <textarea
-          id="message"
-          className={`rounded-lg border p-2 w-full h-60 focus:bg-gray-700 ${
-            errors.message ? "border-red-500" : "border-gray-100"
-          }`}
-          aria-required="true"
-          aria-invalid={Boolean(errors.message)}
-          aria-describedby={errors.message ? "message-error" : undefined}
-          {...register("message", { required: true })}
-        />
-        {errors.message && (
-          <p id="message-error" className="text-red-500" role="alert">
-            {errors.message.message}
-          </p>
-        )}
+              <div className="mt-8 p-4 rounded-xl border border-yellow-500/20 bg-yellow-500/5 text-yellow-200/60 text-xs italic leading-relaxed">
+                Note: This is a simulation. Submitting this form logs the payload to the developer console for inspection and does not trigger a production email flow.
+              </div>
+            </div>
+          </motion.div>
 
-        <button
-          // While submitting, disable the button to prevent double-submits
-          disabled={isSubmitting}
-          aria-disabled={isSubmitting}
-          className="disabled:bg-gray-500 disabled:text-gray-300 w-full bg-blue-800 hover:bg-blue-700 text-white rounded px-3 py-2"
-          type="submit"
-        >
-          {/* Friendly UX: change label while waiting */}
-          {isSubmitting ? "Sending..." : "Submit"}
-        </button>
-      </form>
-    </div>
+          {/* Right Side: The Form */}
+          <div className="relative">
+            <AnimatePresence mode="wait">
+              {!isSuccess ? (
+                  <motion.div
+                      key="demo-form"
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.4 }}
+                  >
+                    <form
+                        onSubmit={handleSubmit(onSubmit)}
+                        className="bg-[#0c0c0c] border border-white/5 p-8 md:p-12 rounded-[2.5rem] shadow-2xl relative"
+                        noValidate
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <motion.div animate={errors.firstName ? "error" : ""} variants={shakeVariants} className="space-y-2">
+                          <label className="text-xs uppercase tracking-widest text-blue-400 font-bold ml-1">First Name</label>
+                          <input {...register("firstName")} className={inputStyles("firstName")} placeholder="Brian" />
+                          {errors.firstName && <p className="text-[10px] text-red-500 font-mono mt-1 ml-1">{errors.firstName.message}</p>}
+                        </motion.div>
+                        <motion.div animate={errors.lastName ? "error" : ""} variants={shakeVariants} className="space-y-2">
+                          <label className="text-xs uppercase tracking-widest text-blue-400 font-bold ml-1">Last Name</label>
+                          <input {...register("lastName")} className={inputStyles("lastName")} placeholder="Woodson" />
+                          {errors.lastName && <p className="text-[10px] text-red-500 font-mono mt-1 ml-1">{errors.lastName.message}</p>}
+                        </motion.div>
+                        <motion.div animate={errors.email ? "error" : ""} variants={shakeVariants} className="md:col-span-2 space-y-2">
+                          <label className="text-xs uppercase tracking-widest text-blue-400 font-bold ml-1">Email</label>
+                          <input {...register("email")} className={inputStyles("email")} placeholder="demo@example.io" />
+                          {errors.email && <p className="text-[10px] text-red-500 font-mono mt-1 ml-1">{errors.email.message}</p>}
+                        </motion.div>
+                        <motion.div animate={errors.message ? "error" : ""} variants={shakeVariants} className="md:col-span-2 space-y-2">
+                          <label className="text-xs uppercase tracking-widest text-blue-400 font-bold ml-1">Message</label>
+                          <textarea {...register("message")} rows={4} className={`${inputStyles("message")} resize-none`} placeholder="Test the validation logic..." />
+                          {errors.message && <p className="text-[10px] text-red-500 font-mono mt-1 ml-1">{errors.message.message}</p>}
+                        </motion.div>
+                      </div>
+
+                      <button
+                          disabled={isSubmitting}
+                          className="mt-10 w-full py-5 bg-blue-600 text-white font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-blue-500 transition-all disabled:opacity-50 shadow-lg shadow-blue-600/20"
+                      >
+                        {isSubmitting ? "Running Test..." : "Submit Tech Demo"}
+                      </button>
+                    </form>
+                  </motion.div>
+              ) : (
+                  <motion.div
+                      key="demo-success"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="bg-[#0c0c0c] border border-white/5 p-16 rounded-[2.5rem] text-center space-y-6 min-h-[500px] flex flex-col justify-center items-center"
+                  >
+                    <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center border border-blue-500/20 mb-4">
+                      <span className="text-blue-400 text-2xl">✓</span>
+                    </div>
+                    <h2 className="text-3xl font-bold text-white uppercase italic">Valid <span className="text-blue-500 not-italic">Payload.</span></h2>
+                    <p className="text-white/60 text-lg leading-relaxed max-w-sm">Schema check passed. Open the developer console to inspect the logged object.</p>
+                    <button onClick={() => setIsSuccess(false)} className="text-blue-400 underline uppercase tracking-widest text-sm pt-4 hover:text-white transition-colors">Restart Demo</button>
+                  </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </section>
   );
 }
