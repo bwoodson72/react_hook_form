@@ -42,7 +42,7 @@ export default function ProfessionalContactDemo() {
 
   return (
       <section id="contact-demo" className="relative min-h-screen w-full flex items-center justify-center px-6 py-24 bg-black overflow-hidden font-sans">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/10 blur-[130px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 bg-blue-600/10 blur-[130px] rounded-full pointer-events-none" />
 
         <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center relative z-10">
 
@@ -71,11 +71,11 @@ export default function ProfessionalContactDemo() {
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
-                <div className="space-y-1 p-4 border border-white/5 bg-white/[0.02] rounded-2xl">
+                <div className="space-y-1 p-4 border border-white/5 bg-white/2 rounded-2xl">
                   <span className="text-blue-400 font-mono text-[10px] uppercase tracking-widest">01 / Validation</span>
                   <p className="text-sm text-white/90 font-medium">Real-time Schema Logic</p>
                 </div>
-                <div className="space-y-1 p-4 border border-white/5 bg-white/[0.02] rounded-2xl">
+                <div className="space-y-1 p-4 border border-white/5 bg-white/2 rounded-2xl">
                   <span className="text-blue-400 font-mono text-[10px] uppercase tracking-widest">02 / UX</span>
                   <p className="text-sm text-white/90 font-medium">Async Submit Handling</p>
                 </div>
@@ -139,7 +139,7 @@ export default function ProfessionalContactDemo() {
                       key="demo-success"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="bg-[#0c0c0c] border border-white/5 p-16 rounded-[2.5rem] text-center space-y-6 min-h-[500px] flex flex-col justify-center items-center"
+                      className="bg-[#0c0c0c] border border-white/5 p-16 rounded-[2.5rem] text-center space-y-6 min-h-125 flex flex-col justify-center items-center"
                   >
                     <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center border border-blue-500/20 mb-4">
                       <span className="text-blue-400 text-2xl">✓</span>
